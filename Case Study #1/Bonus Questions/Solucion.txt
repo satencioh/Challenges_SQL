@@ -1,0 +1,32 @@
+--****Join All The Things****
+
+`with cte as
+(
+SELECT s.customer_id, s.order_date, mu.product_name, mu.price,
+CASE WHEN s.order_date >= m.join_date then 'Y' else 'N' end as miembro,
+DENSE_RANK() OVER( PARTITION BY s.order_date ORDER BY mu.price desc) as producto_rankeado
+FROM menu as mu
+INNER JOIN sales s
+ON s.product_id = mu.product_id
+full JOIN members m
+on s.customer_id = m.customer_id
+) select customer_id, order_date, product_name, price, miembro
+from cte
+order by customer_id;`
+
+--****Rank All The Things****
+
+`with cte_1 as
+(
+SELECT s.customer_id, s.order_date, mu.product_name, mu.price,
+CASE WHEN s.order_date >= m.join_date then 'Y' else 'N' end as miembro,
+DENSE_RANK() OVER( PARTITION BY s.order_date ORDER BY mu.price desc) as producto_rankeado
+FROM menu as mu
+INNER JOIN sales s
+ON s.product_id = mu.product_id
+full JOIN members m
+on s.customer_id = m.customer_id
+)
+select customer_id, order_date, product_name, price, miembro,
+CASE WHEN miembro = 'N' THEN NULL ELSE RANK() OVER( PARTITION BY customer_id ORDER BY order_date asc) END AS rankeo
+from cte_1`
